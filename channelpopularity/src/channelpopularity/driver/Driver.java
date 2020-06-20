@@ -1,5 +1,7 @@
 package channelpopularity.driver;
 import channelpopularity.context.Context2;
+import channelpopularity.helper.Helper;
+import channelpopularity.util.FileProcessor;
 /**
  * @author Krupa Sawant
  *
@@ -19,8 +21,16 @@ public class Driver {
 			System.exit(0);
 		}
 		System.out.println("Hello World! Lets get started with the assignment");
+		FileProcessor fp= new FileProcessor(args[0]);
+		String nextword;
 		
+		Helper helper=new Helper();
+		while(true){
+		nextword=fp.poll();
+		if(nextword==null)
+		break;
+		helper.printinput(nextword);}
 		Context2 context = new Context2();
-		context.addvideo();
+		//context.addvideo();
 	}
 }
