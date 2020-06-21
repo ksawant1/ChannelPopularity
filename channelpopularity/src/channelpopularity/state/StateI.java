@@ -1,9 +1,8 @@
 package channelpopularity.state;
 
 public interface StateI {
-    void addvideo();
-    void removevideo();
-    void calmetrics(int likes,int dislikes,int views);
-    void adrequest(int length);
 
+    public boolean adRequest(int length);
+    public int getMinLength();
+    public int getMaxLength();
 }
