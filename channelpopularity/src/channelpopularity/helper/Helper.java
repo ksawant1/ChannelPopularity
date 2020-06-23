@@ -1,69 +1,78 @@
 package channelpopularity.helper;
+
 import java.lang.Integer;
-import channelpopularity.util.FileProcessor;
-import java.util.HashMap;
+
+import channelpopularity.context.ChannelContext;
+
+import java.util.Arrays;
+
+import channelpopularity.operation.Operation;
+import channelpopularity.state.StateName;
+import channelpopularity.state.factory.SimpleStateFactory;
 
 
 
-public class Helper{
-    String[] arrsplit,arrsplit2,arrsplit3;
-    HashMap<String,String> storeinput= new HashMap<String,String>();
-    int views,likes,dislikes,results=0;
-    String results1;
+public class Helper {
 
-    public Helper(){
-    }
+	private static ChannelContext context;
 
-    public void printinput(String inputfile){
-        //System.out.println(inputfile);
-        arrsplit=inputfile.split("::");
-        
-            if(arrsplit[0].contains("ADD_VIDEO"))
-            {
-            storeinput.put(arrsplit[1],null);
-            System.out.println(storeinput.size());
-            }
+	static {
+		context = new ChannelContext(new SimpleStateFactory(), Arrays.asList(StateName.values()));
+	}
 
-            if(arrsplit[0].contains("METRICS"))
-            {
-                 
-               arrsplit2=arrsplit[0].split("__");
-               
-               arrsplit=arrsplit[1].split(",");
-                 //System.out.println(arrsplit[0]);
-                   arrsplit3=arrsplit[0].split("=");
-                   views=Integer.parseInt(arrsplit3[1]);
-                   arrsplit3=arrsplit[1].split("=");
-                   likes=Integer.parseInt(arrsplit3[1]);
-                   arrsplit3=arrsplit[2].split("=");
-                   arrsplit3=arrsplit3[1].split("]");
-                   dislikes=Integer.parseInt(arrsplit3[0]);
-                  results= (views+2*(likes-dislikes));
-                  results1=String.valueOf(results);
-                   System.out.println(results1); 
-                   if(storeinput.containsKey(arrsplit2[1])){
-                       
-                   storeinput.replace(arrsplit2[1],null,results1);
-                   //System.out.println(storeinput);
+	public static void printOutput(String inputLine) {
 
-               }      
+		String[] inputs = inputLine.split("::");
+		String[] operationParams = inputs[0].split("__");
+		String operationString = operationParams[0];
 
-            
-            }
+		Operation operation = Operation.valueOf(operationString);
 
-            if(arrsplit[0].contains("REMOVE_VIDEO"))
-            {
-            if(storeinput.containsKey(arrsplit2[1])){
-                   storeinput.remove(arrsplit2[1]);
-                   //System.out.println(storeinput);
-                  // System.out.println("yes removed");
+		switch (operation) {
+			case ADD_VIDEO:
+				addVideo(inputs[1]);
+				break;
+			case REMOVE_VIDEO:
+				removeVideo(inputs[1]);
+				break;
+			case AD_REQUEST:
+				String values[] = inputs[1].split("=");
+				int length = Integer.parseInt(values[1]);
+				adRequest(length);
+				break;
+			case METRICS:
+				String[] params = inputs[1].substring(1, inputs[1].length() -1 ).split(",");
+				updateMetrics(operationParams[1], params);
+		}
 
-               }
+	}
 
-            }
-            
+	private static void updateMetrics(String videoName, String[] params) {
 
-        
-    }
+		int views = Integer.parseInt(params[0].split("=")[1]);
+		int likes = Integer.parseInt(params[1].split("=")[1]);
+		int dislikes = Integer.parseInt(params[2].split("=")[1]);
 
+		StateName prevState = context.getCurrentState();
+		context = context.updateVideoMetrics(videoName, views, likes, dislikes);
+		System.out.println(prevState + "_POPULARITY_SCORE_UPDATE::" + context.getPopularity());
+	}
+
+	private static void adRequest(int length) {
+		StateName prevState = context.getCurrentState();
+		String status = context.addRequest(length) ? "APPROVED" : "REJECTED";
+		System.out.println(prevState + "_AD_REQUEST::" + status);
+	}
+
+	private static void removeVideo(String videoName) {
+		StateName prevState = context.getCurrentState();
+		context = context.removeVideo(videoName);
+		System.out.println(prevState + "_VIDEO_REMOVED::" + videoName);
+	}
+
+	private static void addVideo(String videoName) {
+		StateName prevState = context.getCurrentState();
+		context = context.addVideo(videoName);
+		System.out.println(prevState + "_ADD_VIDEO::" + videoName);
+	}
 }
