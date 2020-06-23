@@ -14,6 +14,7 @@ public class ChannelContext implements ContextI {
 	private Map<StateName, StateI> availableStates;
 
 	private List<VideoContext> videos;
+	private double popularity;
 
 	public ChannelContext(SimpleStateFactoryI stateFactoryIn, List<StateName> stateNames) {
 		// initialize states using factory instance and the provided state names.
@@ -23,7 +24,7 @@ public class ChannelContext implements ContextI {
 		for (StateName stateName : stateNames) {
 			availableStates.put(stateName, stateFactoryIn.create(stateName));
 		}
-		curState = availableStates.get(getCurrentState());
+		curState = availableStates.get(StateName.UNPOPULAR);
 	}
 
 	// Called by the States based on their logic of what the machine state should change to.
@@ -33,53 +34,43 @@ public class ChannelContext implements ContextI {
 		}
 	}
 
-	private void updatePopularityState() {
-		StateName nextState = getCurrentState();
-		setCurrentState(nextState);
+	public StateName getCurrentState() {
+		return curState.getCurrentState(popularity);
 	}
 
-	public StateName getCurrentState() {
-		double popularity = getPopularity();
-		if (popularity > 10000)
-			return StateName.HIGHLY_POPULAR;
-
-		else
-			return StateName.UNPOPULAR;
+	private void updateState() {
+		calcPopularity();
+		setCurrentState(getCurrentState());
 	}
 
 	public boolean addRequest(int length) {
 		return curState.adRequest(length);
 	}
 
-	@Override
-	public double getPopularity() {
-		double popularity = 0.0;
-		for (VideoContext video : videos)
-			popularity += video.getPopularity();
-		return popularity / videos.size();
-	}
-
 	public ChannelContext addVideo(String name) {
 		VideoContext video = findVideo(name);
-		if (video != null) {
+		if (video == null) {
 			videos.add(new VideoContext(name));
-			updatePopularityState();
+			updateState();
 		}
+		// raise VideoAlreadyExistsException if not null
 		return this;
 	}
 
 	public ChannelContext removeVideo(String name) {
 		VideoContext video = findVideo(name);
+		// raise VideoNotFoundException if  null
 		videos.remove(video);
-		updatePopularityState();
+		updateState();
 		return this;
 	}
 
 
 	public ChannelContext updateVideoMetrics(String name, int views, int likes, int dislikes) {
 		VideoContext video = findVideo(name);
-		video.updateMetrics(likes, dislikes, views);
-		updatePopularityState();
+		// raise VideoNotFoundException if  null
+		video.updateMetrics(views, likes, dislikes);
+		updateState();
 		return this;
 	}
 
@@ -90,5 +81,20 @@ public class ChannelContext implements ContextI {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void calcPopularity() {
+		double sum = 0.0;
+		for (VideoContext video : videos) {
+			video.calcPopularity();
+			sum += video.getPopularity();
+		}
+		popularity = sum / videos.size();
+		//popularity = videos.stream().mapToDouble(video -> calcVideoPopularity(video)).average().orElse(0.0);
+	}
+
+	public double getPopularity() {
+		return popularity;
 	}
 }
