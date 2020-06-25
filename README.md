@@ -1,5 +1,6 @@
 # CSX42: Assignment 2
-**Name:**
+**Name:Krupa Sawant
+**B-Number: B00 814013
 
 -----------------------------------------------------------------------
 
@@ -33,7 +34,16 @@ Note: Arguments accept the absolute path of the files.
 
 
 ## Description:
-
+## Assumptions:
+     1. Each line of input contains one operation per line.
+     2. The input line doesn't contain spaces.
+## Program Flow:
+     1. Driver code accepts line of input from File Processor and sends to Helper class.
+     2. Helper Class processes every line of input and calls the corresponding action to be performed to channel context class.
+     3. The channel context class implements the context interface which performs adding and removing videos from video context class, calculating metrics and approving  
+     of rejecting ad request, getting and setting current state based on popularity.
+     4. Result Class writes to output file and console.
+     5. Data structure used is array list for output.
 
 ## Academic Honesty statement:
 
@@ -43,6 +53,6 @@ I am involved in plagiarism or cheating an official form will be
 submitted to the Academic Honesty Committee of the Watson School to
 determine the action that needs to be taken. "
 
-Date: [ADD_DATE_HERE]
+Date: 06/24/2020
 
 
