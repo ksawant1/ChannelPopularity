@@ -7,6 +7,9 @@ import channelpopularity.state.StateName;
 import channelpopularity.state.UltraPopularState;
 import channelpopularity.state.UnpopularState;
 
+/**
+ * implements the SimpleStateFactory interface overriding the creating method in order to map enums with every state class
+ */
 public class SimpleStateFactory implements SimpleStateFactoryI {
 
     @Override
@@ -24,4 +27,5 @@ public class SimpleStateFactory implements SimpleStateFactoryI {
                 return null;
         }
     }
+
 }

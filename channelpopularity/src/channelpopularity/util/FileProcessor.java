@@ -32,7 +32,7 @@ public final class FileProcessor {
 		throws InvalidPathException, SecurityException, FileNotFoundException, IOException {
 
 		if (!Files.exists(Paths.get(inputFilePath))) {
-			throw new FileNotFoundException("invalid input file or input file in incorrect location");
+			throw new FileNotFoundException("invalid input file or input file in incorrect location or file is missing");
 		}
 
 		reader = new BufferedReader(new FileReader(new File(inputFilePath)));

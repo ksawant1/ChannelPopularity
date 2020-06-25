@@ -1,4 +1,7 @@
 package channelpopularity.state;
+/**
+ * defines enums for each of the four states
+ */
 
 public enum StateName {
     UNPOPULAR,

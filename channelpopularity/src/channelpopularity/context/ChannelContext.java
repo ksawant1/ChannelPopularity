@@ -1,14 +1,21 @@
 package channelpopularity.context;
 
+import channelpopularity.exceptions.VideoNotFoundException;
 import channelpopularity.state.StateI;
 import channelpopularity.state.StateName;
 import channelpopularity.state.factory.SimpleStateFactoryI;
+import channelpopularity.exceptions.VideoAlreadyExistsException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Channel Context is a utility to be used every time we need to update popularity score based on given action
+ *
+ *  @author Krupa Sawant
+ */
 public class ChannelContext implements ContextI {
 	private StateI curState;
 	private Map<StateName, StateI> availableStates;
@@ -33,46 +40,73 @@ public class ChannelContext implements ContextI {
 			curState = availableStates.get(nextState);
 		}
 	}
+	/**
+	 * returns current state based on popularity
+	 */
 
 	public StateName getCurrentState() {
 		return curState.getCurrentState(popularity);
 	}
 
+	/**
+	 * updates state every time popularity score gets updated
+	 */
 	private void updateState() {
 		calcPopularity();
 		setCurrentState(getCurrentState());
 	}
-
+	/**
+	 * returns true or false based on whether ad request approved or rejected
+	 */
 	public boolean addRequest(int length) {
 		return curState.adRequest(length);
 	}
 
-	public ChannelContext addVideo(String name) {
+	/**
+	 * returns type Channel Context based on whether video added or not
+	 */
+
+	public ChannelContext addVideo(String name) throws VideoAlreadyExistsException {
 		VideoContext video = findVideo(name);
 		if (video == null) {
 			videos.add(new VideoContext(name));
 			updateState();
 		}
-		// raise VideoAlreadyExistsException if not null
+		else throw new VideoAlreadyExistsException("cannot add video as it already exists");
 		return this;
 	}
+	/**
+	 * returns type channel context based on whetther video removed or not
+	 */
 
-	public ChannelContext removeVideo(String name) {
+	public ChannelContext removeVideo(String name) throws VideoNotFoundException {
 		VideoContext video = findVideo(name);
 		// raise VideoNotFoundException if  null
-		videos.remove(video);
-		updateState();
+		if (video != null) {
+
+			videos.remove(video);
+			updateState();
+		}
+		else throw  new VideoNotFoundException("cannot remove video as it cannot be found");
 		return this;
 	}
+	/**
+	 * returns type channel context after calc popularity score of particular video
+	 */
 
-
-	public ChannelContext updateVideoMetrics(String name, int views, int likes, int dislikes) {
+	public ChannelContext updateVideoMetrics(String name, int views, int likes, int dislikes) throws VideoNotFoundException {
 		VideoContext video = findVideo(name);
 		// raise VideoNotFoundException if  null
-		video.updateMetrics(views, likes, dislikes);
-		updateState();
+		if (video != null) {
+			video.updateMetrics(views, likes, dislikes);
+			updateState();
+		}
+		else throw  new VideoNotFoundException("cannot remove video as it cannot be found");
 		return this;
 	}
+	/**
+	 * returns type Video Context after finding video in video context
+	 */
 
 	private VideoContext findVideo(String name) {
 		for (VideoContext video : videos) {
@@ -82,6 +116,9 @@ public class ChannelContext implements ContextI {
 		}
 		return null;
 	}
+	/**
+	 * calculates popularity score
+	 */
 
 	@Override
 	public void calcPopularity() {
@@ -96,5 +133,15 @@ public class ChannelContext implements ContextI {
 
 	public double getPopularity() {
 		return popularity;
+	}
+
+	@Override
+	public String toString() {
+		return "ChannelContext{" +
+				"curState=" + curState +
+				", availableStates=" + availableStates +
+				", videos=" + videos +
+				", popularity=" + popularity +
+				'}';
 	}
 }

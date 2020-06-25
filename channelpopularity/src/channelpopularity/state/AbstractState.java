@@ -5,9 +5,16 @@ import static channelpopularity.state.StateName.HIGHLY_POPULAR;
 import static channelpopularity.state.StateName.MILDLY_POPULAR;
 import static channelpopularity.state.StateName.UNPOPULAR;
 
+/**
+ * defines all the common methods for Channel Context
+ * @author Krupa Sawant
+ */
 public abstract class AbstractState implements StateI {
 
 	@Override
+	/**
+	 * returns current state based on popularity range
+	 */
 	public StateName getCurrentState(double popularity) {
 
 		if (popularity > 100000)
@@ -21,6 +28,9 @@ public abstract class AbstractState implements StateI {
 	}
 
 	@Override
+	/**
+	 * minimum length for adrequest will always be 1 for every channel state
+	 */
 	public int getMinLength() {
 		return 1;
 	}
@@ -29,4 +39,8 @@ public abstract class AbstractState implements StateI {
 	public boolean adRequest(int length) {
 		return getMinLength() < length && length <= getMaxLength();
 	}
+
+
+
+
 }

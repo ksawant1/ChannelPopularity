@@ -1,5 +1,9 @@
 package channelpopularity.context;
 
+/**
+ * video context - utility for maintaining a context for video wrt it's own likes, views and dislikes
+ * @author Krupa Sawant
+ */
 public class VideoContext implements ContextI {
 
     private String name;
@@ -31,6 +35,7 @@ public class VideoContext implements ContextI {
             throw new IllegalArgumentException("Cannot update the factor of views less than the current value");
         this.views += views;
     }
+
     private void updateLikes(int likes) {
         if(this.likes + likes < 0)
             throw new IllegalArgumentException("Cannot update the factor of likes less than the current value");
@@ -45,5 +50,16 @@ public class VideoContext implements ContextI {
     @Override
     public void calcPopularity() {
         popularity =  Math.abs(views + (2 * (likes - dislikes)));
+    }
+
+    @Override
+    public String toString() {
+        return "VideoContext{" +
+                "name='" + name + '\'' +
+                ", likes=" + likes +
+                ", dislikes=" + dislikes +
+                ", views=" + views +
+                ", popularity=" + popularity +
+                '}';
     }
 }
